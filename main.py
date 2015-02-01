@@ -32,13 +32,13 @@ class Servo(object):
 	# Setup functions
 	def initializePins(self):
 		# echo mode1 > /sys/kernel/debug/gpio_debug/gpio13/current_pinmux
-		with open("/sys/kernel/debug/gpio_debug/gpio{}/current_pinmux".format(self.getGPIOPin())) as pinmux:
+		with open("/sys/kernel/debug/gpio_debug/gpio{}/current_pinmux".format(self.getGPIOPin()), "w") as pinmux:
 			pinmux.write('mode1')
 		# echo 1 > /sys/class/pwm/pwmchip0/export
-		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin())) as setPWMType:
+		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as setPWMType:
 			setPWMType.write("1")
 		# echo 20000000 > /sys/class/pwm/pwmchip0/pwm1/period
-		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin())) as period:
+		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as period:
 			period.write(self.getPeriod())
 
 	# Main mapping PWM function
@@ -61,18 +61,18 @@ class Servo(object):
 
 	# Commandline functions
 	def setDutyCycle(self, dutyCycle):
-		with open("/sys/class/pwm/pwmchip0/pwm{}/duty_cycle".format(self.getPWMPin())) as duty_cycle:
+		with open("/sys/class/pwm/pwmchip0/pwm{}/duty_cycle".format(self.getPWMPin()), "w") as duty_cycle:
 			duty_cycle.write(dutyCycle)
 
 	def enable(self):
 		if not self.enable:
-			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin())) as enabledSwitch:
+			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin()), "w") as enabledSwitch:
 				enabledSwitch.write(1)
 			self.enable = True
 
 	def disable(self):
 		if self.enable:
-			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin())) as enabledSwitch:
+			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin()), "w") as enabledSwitch:
 				enabledSwitch.write(0)
 			self.enable = False
 
