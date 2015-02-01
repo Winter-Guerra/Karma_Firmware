@@ -1,0 +1,47 @@
+./node_modules/.bin/cylon-ble-info 80fba7af42c841bda5cfa139cd0640c8
+peripheral with UUID 80fba7af42c841bda5cfa139cd0640c8 found
+  Local Name        = Karma My
+  Service Data      =
+  Service UUIDs     = d5060001a904deb947482c7f4a124842
+
+services and characteristics:
+180a (Device Information)
+  2a29 (Manufacturer Name String)
+    properties  read
+    value       5468616c6d6963204c616273 | 'Thalmic Labs'
+180f (Battery Service)
+  2a19 (Battery Level)
+    properties  read, notify
+    value       57 | 'W'
+d5060001a904deb947482c7f4a124842
+d5060101a904deb947482c7f4a124842
+    properties  read
+    value       b8d1bd5735ec0500000001000000000000000000 | '8Q=W5l'
+d5060201a904deb947482c7f4a124842
+    properties  read
+    value       0100010005000200 | ''
+  d5060401a904deb947482c7f4a124842
+    properties  write
+d5060002a904deb947482c7f4a124842
+  d5060402a904deb947482c7f4a124842
+    properties  notify
+  d5060502a904deb947482c7f4a124842
+    properties  indicate
+d5060003a904deb947482c7f4a124842
+  d5060103a904deb947482c7f4a124842
+    properties  indicate
+d5060004a904deb947482c7f4a124842
+  d5060104a904deb947482c7f4a124842
+    properties  notify
+d5060005a904deb947482c7f4a124842
+  d5060105a904deb947482c7f4a124842
+    properties  notify
+  d5060205a904deb947482c7f4a124842
+    properties  notify
+  d5060305a904deb947482c7f4a124842
+    properties  notify
+  d5060405a904deb947482c7f4a124842
+    properties  notify
+d5060006a904deb947482c7f4a124842
+  d5060602a904deb947482c7f4a124842
+    properties  indicate

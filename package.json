@@ -1,0 +1,20 @@
+{
+  "name": "myo_node_controller",
+  "version": "0.0.1",
+  "description": "Preliminary Arm Controller for the Karma arm",
+  "main": "main.coffee",
+  "dependencies": {
+    "coffee-script": "^1.8.0",
+    "cylon": "^0.21.2",
+    "cylon-gpio": "^0.21.0",
+    "cylon-i2c": "^0.18.0",
+    "cylon-intel-iot": "^0.4.0",
+    "noble": "^0.3.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Winter Guerra <winterg@mit.edu>",
+  "license": "All Rights Reserved"
+}
