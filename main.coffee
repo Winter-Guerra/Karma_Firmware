@@ -1,27 +1,34 @@
 "use strict"
 
-# Connnect to a specific MYO using cylon.js
-cylon = require("cylon")
-cylon.robot(
+child_process = require 'child_process'
 
-	connections:
-		bluetooth:
-			adaptor: "ble"
-			uuid: "80fba7af42c841bda5cfa139cd0640c8"
+console.log "Hello World"
 
-	devices:
-		myo:
-			driver: "myo"
+# Starting python script
+child_process.spawn('python', ['./myo-raw/myo_raw.py'])
 
-	work: (robot) ->
+# # Connnect to a specific MYO using cylon.js
+# cylon = require("cylon")
+# cylon.robot(
 
-		every 5.seconds(), () ->
-			robot.myo.getFirmwareVersion (err, data) ->
-				if err
-					console.log "Error: ", err
-					return
-				else
-					console.log "FirmwareVersion: ", data
+# 	connections:
+# 		bluetooth:
+# 			adaptor: "ble"
+# 			uuid: "80fba7af42c841bda5cfa139cd0640c8"
 
-# Start the robot			
-).start()
+# 	devices:
+# 		myo:
+# 			driver: "myo"
+
+# 	work: (robot) ->
+
+# 		every 5.seconds(), () ->
+# 			robot.myo.getFirmwareVersion (err, data) ->
+# 				if err
+# 					console.log "Error: ", err
+# 					return
+# 				else
+# 					console.log "FirmwareVersion: ", data
+
+# # Start the robot			
+# ).start()
