@@ -22,4 +22,26 @@ pip install pyserial
 # Erase the journal logs to gain some space
 rm -rf /var/log/journal/*
 
-# Install the MRAA library for gpio control of the edison
+# Access the pwm for pin 0
+# From website http://www.emutexlabs.com/project/215-intel-edison-gpio-pin-multiplexing-guide
+
+# Wrist motor (top)
+echo mode1 > /sys/kernel/debug/gpio_debug/gpio13/current_pinmux
+echo 1 > /sys/class/pwm/pwmchip0/export
+echo 20000000 > /sys/class/pwm/pwmchip0/pwm1/period
+echo 600000 > /sys/class/pwm/pwmchip0/pwm1/duty_cycle
+echo 2100000 > /sys/class/pwm/pwmchip0/pwm1/duty_cycle
+echo 1 > /sys/class/pwm/pwmchip0/pwm1/enable
+
+# Hand motor (bottom)
+echo mode1 > /sys/kernel/debug/gpio_debug/gpio12/current_pinmux
+echo 0 > /sys/class/pwm/pwmchip0/export
+echo 20000000 > /sys/class/pwm/pwmchip0/pwm0/period
+echo 400000 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+echo 2200000 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+
+# Calibration settings for Futuba S3003 (duty cycle)
+
+
+# Calibration settings for 
