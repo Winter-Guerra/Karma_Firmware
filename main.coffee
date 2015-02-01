@@ -5,7 +5,8 @@ child_process = require 'child_process'
 console.log "Hello World"
 
 # Starting python script
-child_process.spawn('python', ['./myo-raw/myo_raw.py'])
+child_process.spawn('python', ['./myo-raw/myo_raw.py'], {stdio: 'inherit'})
+
 
 # # Connnect to a specific MYO using cylon.js
 # cylon = require("cylon")
