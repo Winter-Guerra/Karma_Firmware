@@ -18,3 +18,8 @@ python get-pip.py
 # Get packages for python
 pip install enum34
 pip install pyserial
+
+# Erase the journal logs to gain some space
+rm -rf /var/log/journal/*
+
+# Install the MRAA library for gpio control of the edison
