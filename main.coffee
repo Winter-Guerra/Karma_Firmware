@@ -4,34 +4,37 @@ child_process = require 'child_process'
 
 console.log "Hello World"
 
-# Starting python script
-child_process.spawn('python', ['./myo-raw/myo_raw.py'], {stdio: 'inherit'})
+# Starting 
 
-console.log "test over"
+# # Starting python script
+# child_process.spawn('python', ['./myo-raw/myo_raw.py'], {stdio: 'inherit'})
+
+# console.log "test over"
 
 
-# # Connnect to a specific MYO using cylon.js
-# cylon = require("cylon")
-# cylon.robot(
+# Connnect to a specific MYO using cylon.js
+cylon = require("cylon")
+cylon.robot(
 
-# 	connections:
-# 		bluetooth:
-# 			adaptor: "ble"
-# 			uuid: "80fba7af42c841bda5cfa139cd0640c8"
+	connections:
+		edison: 
+			adaptor: 'intel-iot'
 
-# 	devices:
-# 		myo:
-# 			driver: "myo"
+	devices:
+		servo:
+			driver: 'servo'
+			pin: 0
 
-# 	work: (robot) ->
+	work: (my) ->
+		angle = 45
+		my.servo.angle angle
+		every 1.second(), ->
+			angle = angle + 45
+			if angle > 135
+				angle = 45
+			my.servo.angle angle
+			return
+		return
 
-# 		every 5.seconds(), () ->
-# 			robot.myo.getFirmwareVersion (err, data) ->
-# 				if err
-# 					console.log "Error: ", err
-# 					return
-# 				else
-# 					console.log "FirmwareVersion: ", data
-
-# # Start the robot			
-# ).start()
+# Start the robot			
+).start()
