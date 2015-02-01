@@ -34,9 +34,11 @@ class Servo(object):
 		# echo mode1 > /sys/kernel/debug/gpio_debug/gpio13/current_pinmux
 		with open("/sys/kernel/debug/gpio_debug/gpio{}/current_pinmux".format(self.getGPIOPin()), "w") as pinmux:
 			pinmux.write('mode1')
+		
 		# echo 1 > /sys/class/pwm/pwmchip0/export
-		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as setPWMType:
-			setPWMType.write("1")
+		with open("/sys/class/pwm/pwmchip0/export", "w") as enablePWM:
+			enablePWM.write(self.getPWMPin())
+
 		# echo 20000000 > /sys/class/pwm/pwmchip0/pwm1/period
 		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as period:
 			period.write(self.getPeriod())
