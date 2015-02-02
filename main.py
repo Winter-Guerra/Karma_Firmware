@@ -1,5 +1,7 @@
 #!/usr/bin/env python 
 
+import time
+
 # This file is the main Karma controller
 
 # Let's test the servos
@@ -23,7 +25,7 @@ class Servo(object):
 	
 	def __init__(self, servoType):
 		self.servoType = servoType
-		self.enable = False
+		self.enabled = False
 
 		# Initialize the pins, but do not start PWM until the first PWM command has been given
 		self.initializePins()
@@ -46,19 +48,22 @@ class Servo(object):
 		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as period:
 			period.write(str(self.getPeriod()))
 
+		# Set the initial position location to be 90deg
+		self.angle(90)
+
 	# Main mapping PWM function
 	def angle(self, angleValue):
 		# Map the angle to a duty cycle value
-		dutyCyleFloat = self.scale(angleValue, (0.0, 180.0), (float(self.getMinDutyCycle())), float(self.getMaxDutyCycle()))
-		print dutyCyleFloat
+		inputRange = (0.0, 180.0)
+		outputRange = ( float(self.getMinDutyCycle()), float(self.getMaxDutyCycle()) )
+		dutyCyleFloat = self.scale( angleValue, inputRange, outputRange)
 		# Make the duty cycle an integer
 		dutyCycle = int(round(dutyCyleFloat))
-		print dutyCycle
 		# Set the duty cycle
 		self.setDutyCycle(dutyCycle)
 
-	# Helper scaling function
-	def scale(val, src, dst):
+	# STATIC helper scaling function
+	def scale(self, val, src, dst):
 		#Scale the given value from the scale of src to the scale of dst.
 		return ((val - src[0]) / (src[1]-src[0])) * (dst[1]-dst[0]) + dst[0]
 
@@ -70,16 +75,16 @@ class Servo(object):
 			duty_cycle.write(str(dutyCycle))
 
 	def enable(self):
-		if not self.enable:
+		if not self.enabled:
 			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin()), "w") as enabledSwitch:
 				enabledSwitch.write("1")
-			self.enable = True
+			self.enabled = True
 
 	def disable(self):
-		if self.enable:
+		if self.enabled:
 			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin()), "w") as enabledSwitch:
 				enabledSwitch.write("0")
-			self.enable = False
+			self.enabled = False
 
 	# Getter functions
 	def getMinDutyCycle(self):
@@ -107,10 +112,12 @@ if __name__ == '__main__':
 	# Let's try to move the wrist back and forth
 	wristServo.angle(0)
 	wristServo.enable() ## THIS IS IMPORTANT!
-	time.sleep(500)
+
+	time.sleep(5)
 	wristServo.angle(180)
-	time.sleep(500)
+	time.sleep(5)
 	wristServo.angle(90)
+	time.sleep(5)
 
 	wristServo.disable()
 	
