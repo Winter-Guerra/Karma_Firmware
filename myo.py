@@ -26,9 +26,10 @@ class Myo(MyoRaw):
 		self.callbacks = callbacks
 
 		# FOR DEBUGGING
-		self.callbacks = {
-			'toggleHand': lambda: print("Toggling Hand (NOT IMPLIMENTED)")
-		}
+		# self.callbacks = {
+		# 	'toggleHand': lambda: print("Toggling Hand (NOT IMPLIMENTED)"),
+		# 	'updateWristRotation': lambda: print("Rotating wrist (NOT IMPLIMENTED)")
+		# }
 
 		# # Initiate the history. Initially, this list has an average of zero.
 		self.rollingHistory = deque([(1,1)], Myo.HIST_LEN)
@@ -45,7 +46,8 @@ class Myo(MyoRaw):
 		# EMG
 		self.add_emg_handler(self.edge_detector)
 
-		self.add_emg_handler(lambda unused1, unused2: print( str( time.time() ) ) )
+		# For debugging
+		#self.add_emg_handler(lambda unused1, unused2: print( str( time.time() ) ) )
 
 		# IMU
 		
@@ -127,7 +129,7 @@ class Myo(MyoRaw):
 		# Hint, states that we can be in are 'standby', 'in_pulse', 'in_long_pulse'
 
 		# DEBUG
-		print("Detected rising edge")
+		print("Detected rising edge", time.time())
 
 		if self.signalState is 'standby':
 			
