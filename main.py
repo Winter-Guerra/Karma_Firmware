@@ -4,6 +4,7 @@
 
 import time
 import threading
+import sys
 
 from Servo import *
 from myo import Myo
