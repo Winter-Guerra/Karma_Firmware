@@ -41,7 +41,7 @@ class Servo(object):
 				enablePWM.write(str(self.getPWMPin()))
 		except:
 			print "Pin {} is already setup as a PWM output. Skipping this setup step.".format(self.getPWMPin())
-			
+
 		# echo 20000000 > /sys/class/pwm/pwmchip0/pwm1/period
 		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as period:
 			period.write(str(self.getPeriod()))
@@ -49,7 +49,7 @@ class Servo(object):
 	# Main mapping PWM function
 	def angle(self, angleValue):
 		# Map the angle to a duty cycle value
-		dutyCyleFloat = self.scale(angleValue, (0.0, 100.0), (float(self.getMinDutyCycle())), float(self.getMaxDutyCycle()))
+		dutyCyleFloat = self.scale(angleValue, (0.0, 180.0), (float(self.getMinDutyCycle())), float(self.getMaxDutyCycle()))
 		print dutyCyleFloat
 		# Make the duty cycle an integer
 		dutyCycle = int(round(dutyCyleFloat))
@@ -104,7 +104,13 @@ class Servo(object):
 if __name__ == '__main__':
 	wristServo = Servo('wrist')
 
-	# Check that the servo is properly calibrated
-	# print 'Max ', wristServo.getMaxDutyCycle()
-	# print 'Min ', wristServo.getMinDutyCycle()
+	# Let's try to move the wrist back and forth
+	wristServo.angle(0)
+	wristServo.enable() ## THIS IS IMPORTANT!
+	time.sleep(500)
+	wristServo.angle(180)
+	time.sleep(500)
+	wristServo.angle(90)
+
+	wristServo.disable()
 	
