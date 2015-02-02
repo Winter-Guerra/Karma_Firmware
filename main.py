@@ -37,11 +37,11 @@ class Servo(object):
 		
 		# echo 1 > /sys/class/pwm/pwmchip0/export
 		with open("/sys/class/pwm/pwmchip0/export", "w") as enablePWM:
-			enablePWM.write(self.getPWMPin())
+			enablePWM.write(str(self.getPWMPin()))
 
 		# echo 20000000 > /sys/class/pwm/pwmchip0/pwm1/period
 		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as period:
-			period.write(self.getPeriod())
+			period.write(str(self.getPeriod()))
 
 	# Main mapping PWM function
 	def angle(self, angleValue):
@@ -64,18 +64,18 @@ class Servo(object):
 	# Commandline functions
 	def setDutyCycle(self, dutyCycle):
 		with open("/sys/class/pwm/pwmchip0/pwm{}/duty_cycle".format(self.getPWMPin()), "w") as duty_cycle:
-			duty_cycle.write(dutyCycle)
+			duty_cycle.write(str(dutyCycle))
 
 	def enable(self):
 		if not self.enable:
 			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin()), "w") as enabledSwitch:
-				enabledSwitch.write(1)
+				enabledSwitch.write("1")
 			self.enable = True
 
 	def disable(self):
 		if self.enable:
 			with open("/sys/class/pwm/pwmchip0/pwm{}/enable".format(self.getPWMPin()), "w") as enabledSwitch:
-				enabledSwitch.write(0)
+				enabledSwitch.write("0")
 			self.enable = False
 
 	# Getter functions
