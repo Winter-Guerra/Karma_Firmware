@@ -14,7 +14,7 @@ from myo_common import *
 class Arm(object):
 
 	MOTOR_IDLE_TIME = 2 # seconds
-	WRIST_SPEED = 50 # a scalar on the relative rotation speed for the updateWristRotation() callback
+	WRIST_SPEED = 25 # a scalar on the relative rotation speed for the updateWristRotation() callback
 
 
 	# This will create the hand and wrist servos in the arm. This will also create the Myo instance.
