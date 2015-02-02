@@ -42,7 +42,7 @@ class Myo(MyoRaw):
 		# EMG
 		self.add_emg_handler(self.edge_detector)
 
-		#self.add_emg_handler(print)
+		self.add_emg_handler(lambda unused1, unused2: print( str( time.time() ) ) )
 
 		# IMU
 		
@@ -80,7 +80,9 @@ class Myo(MyoRaw):
 				self.detectedRisingEdge()
 				return
 		else:
-			print("Arm moving. Not making a signal.")
+			#print("Arm moving. Not making a signal.")
+			pass
+
 		# If we make it here, we detected a falling edge
 		self.detectedFallingEdge()
 
