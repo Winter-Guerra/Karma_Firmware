@@ -29,9 +29,9 @@ class Arm(object):
 		self.handResetTimer = None # Used to turn off the motor after 2 seconds of inactivity
 		self.wristResetTimer = None
 
-		# Center motors
-		self.openHand()
-		self.setWristPosition(90) # deg
+		# Center motors (not needed)
+		# self.openHand()
+		# self.setWristPosition(90) # deg
 
 		# Create the Myo controller sensor (with callbacks)
 		callbacks = {

@@ -5,6 +5,7 @@ import sys
 import time
 import math
 import random
+import threading
 
 from myo_common import *
 from myo_raw import MyoRaw
@@ -23,6 +24,7 @@ class Myo(MyoRaw):
 	MAX_MUSCLE_DIFFERENCE = 2.25 # Bicep and tricep cannot be more than 2x higher than each other.
 	MIN_AMPLITUDE_THRESHOLD = 3.5 # All signals must be at least 3x larger than the norm.
 	FRAMES_FOR_RECENT_ACTIVITY = int(0.25*50) #1/4 sec at 50hz
+	MAX_TIME_WITHOUT_COMMS = 10 # seconds
 
 	# Callbacks is a dict
 	def __init__(self, callbacks):
@@ -36,10 +38,10 @@ class Myo(MyoRaw):
 		# 	'updateWristRotation': lambda: print("Rotating wrist (NOT IMPLIMENTED)")
 		# }
 
-		# # Initiate the history. Initially, this list has an average of zero.
-		self.rollingHistory = deque([(1,1)], Myo.HIST_LEN)
+		# # Initiate the history. Initially, this list has an average of something huge
+		self.rollingHistory = deque([(1000,1000)], Myo.HIST_LEN)
 		self.rollingHistoryModuloCounter = 0
-		self.recentActivityList = deque([(1,1)], Myo.FRAMES_FOR_RECENT_ACTIVITY)
+		self.recentActivityList = deque([(1000,1000)], Myo.FRAMES_FOR_RECENT_ACTIVITY)
 
 
 		# These vars are used later by logic
@@ -48,6 +50,7 @@ class Myo(MyoRaw):
 		self.IMU_Enabled = False # 
 		self.startingQuaternion = None # Keep this at None when not in use
 		self.startingRoll = None
+		self.lastKnownCommunication = time.time() # Used as a watchdog to reboot script.
 
 		
 		# Set the logic triggers
@@ -57,16 +60,16 @@ class Myo(MyoRaw):
 		# For debugging
 		#self.add_emg_handler(lambda unused1, unused2: print( str( time.time() ) ) )
 
-		# IMU
-		# def debugIMU(quat, accel, gyro):
-		# 	if random.randrange(1,10) is 1:
-		# 			print(quat, accel, gyro)
-
-		# 	#print(quat, accel, gyro)
 		self.add_imu_handler(self.IMUCallback)
+
+		# Make sure that the script does not break
+		self.watchCommunications()
 		
 
 	def edge_detector(self, datapoint, moving):
+		# Log this communication
+		self.lastKnownCommunication = time.time()
+
 
 		# Take our current datapoint and sort it for ease of use later.
 		# Then, let's add it to our history
@@ -205,17 +208,21 @@ class Myo(MyoRaw):
 		self.IMU_Enabled = False 
 
 	def IMUCallback(self, quat, accel, gyro):
+		# log this communication
+		self.lastKnownCommunication = time.time()
+
+
 		# Check if we can continue with our callback
 		if self.IMU_Enabled:
 
 			# Check if we need to take a reference quaternion
 			#if not self.startingQuaternion:
 			if not self.startingRoll:
-				# For Quaternions
-				# normalizedQuaternionArray = normalize(quat)
-				# self.startingQuaternion = Quat(normalizedQuaternionArray)
-				
-				# Without Numpy
+
+				# We are starting a move. Let's give the user a buzz to show them that they are in control now.
+				self.vibrate(1)
+
+				# Now, let's save the starting roll of the user.
 				x = quat[0]
 				y = quat[1]
 				z = quat[2]
@@ -225,18 +232,7 @@ class Myo(MyoRaw):
 
 
 			else:
-				# WITH NUMPY
-				# we should do some math to see how much we have rolled.
-				# currentQuaternionArray = normalize(quat)
-				# currentQuaternion = Quat(currentQuaternionArray)
-
-				# # Take the current position and multiply that with the inverse of the original position (to get a local delta)
-				# differenceQuat = currentQuaternion / self.startingQuaternion
-
-				# # Take the roll component out of the quat
-				# print(differenceQuat.roll)
-
-				# WITHOUT NUMPY
+				# Let's find the current roll of the myo to get the difference in rotation of the arm.
 				x = quat[0]
 				y = quat[1]
 				z = quat[2]
@@ -255,6 +251,16 @@ class Myo(MyoRaw):
 			# Reset our saved position
 			self.startingQuaternion = None
 			self.startingRoll = None
+
+	# System functions
+	def watchCommunications(self):
+		# Check the last known communication timestamp. If it was long ago, kill the script and allow forever to bring it back up.
+		currentTime = time.time()
+		if (currentTime - self.lastKnownCommunication) > Myo.MAX_TIME_WITHOUT_COMMS:
+			sys.exit(1) # exit with error code
+
+		# Make this function repeat forever on a timer
+		threading.Timer(Myo.MAX_TIME_WITHOUT_COMMS, self.watchCommunications).start()
 
 	# MATH functions
 
