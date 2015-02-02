@@ -12,11 +12,12 @@ class Myo(MyoRaw):
 	'''Adds higher-level pose classification and handling onto MyoRaw.'''
 
 	# This is calibrated to hold about 1min of data. This will be used to find the baseline muscle activity.
-	HIST_LEN = 30 * 50 # 30 seconds at about 50hz
+	HIST_LEN = 15 * 50 # 30 seconds at about 50hz
 	MAX_SHORT_PULSE_TIME = 0.5 # seconds
-	ARM_IDLE_CERTAINTY = 0.9 # certainty that arm is idle must be higher than this.
-	MAX_MUSCLE_DIFFERENCE = 2 # Bicep and tricep cannot be more than 2x higher than each other.
-	MIN_AMPLITUDE_THRESHOLD = 4 # All signals must be at least 4x larger than the norm.
+	ARM_IDLE_CERTAINTY = 0.8 # certainty that arm is idle must be higher than this.
+	MAX_MUSCLE_DIFFERENCE = 2.5 # Bicep and tricep cannot be more than 2x higher than each other.
+	MIN_AMPLITUDE_THRESHOLD = 3 # All signals must be at least 4x larger than the norm.
+	FRAMES_FOR_RECENT_ACTIVITY = int(0.25*50) #1/4 sec at 50hz
 
 	# Callbacks is a dict
 	def __init__(self, callbacks):
@@ -30,7 +31,8 @@ class Myo(MyoRaw):
 		}
 
 		# # Initiate the history. Initially, this list has an average of zero.
-		self.history = [(1,1)]
+		self.history = deque([(1,1)], Myo.HIST_LEN)
+		self.recentActivityList = deque([(1,1)], Myo.FRAMES_FOR_RECENT_ACTIVITY)
 
 
 		# These vars are used later by logic
@@ -51,31 +53,25 @@ class Myo(MyoRaw):
 
 		# Take our current datapoint and sort it for ease of use later.
 		# Then, let's add it to our history
-		self.history.append(sorted(datapoint))
-		if len(self.history) > Myo.HIST_LEN:
-			# Shorten our history if needed 
-			self.history.pop(0)
+		sortedDatapoints = sorted(datapoint)
+		self.history.append(sortedDatapoints)
+		self.recentActivityList.append(sortedDatapoints)
 
 		# Take an average of our history. This should be the baseline muscle activity.
 		average_baseline = self.averageDatapoints(self.history)
 
 		# Check if our last 0.25sec of recent activity has had relatively even muscle activity. I.E. bicep and tricep are within 2x of each other >90% of the time
 
-		# This is how many datapoints we need to look at
-		recentActivityLength = int(0.25*50) # frames at 50hz
-		recentActivityList = self.history[-recentActivityLength:]
-
 		# Check for even muscle activity on the last 0.25 seconds
-		percentageOfTimeMuscleIsValid = self.evenMuscleActivityTimePercentage(recentActivityList, Myo.MAX_MUSCLE_DIFFERENCE)
+		percentageOfTimeMuscleIsValid = self.evenMuscleActivityTimePercentage(self.recentActivityList, Myo.MAX_MUSCLE_DIFFERENCE)
 		
 		if percentageOfTimeMuscleIsValid > Myo.ARM_IDLE_CERTAINTY:
 			#print("percentage pass at {}".format(percentageOfTimeMuscleIsValid))
 			
 			# Now, check if the average muscle activity is higher than our average by at least 4x
-			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(recentActivityList, average_baseline)
+			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(self.recentActivityList, average_baseline)
 			
 			if timesHighThanAverage > Myo.MIN_AMPLITUDE_THRESHOLD:
-				print("Detected rising edge")
 				# Then, we have a rising edge.
 				self.detectedRisingEdge()
 				return
@@ -126,6 +122,9 @@ class Myo(MyoRaw):
 	def detectedRisingEdge(self):
 		# Hint, states that we can be in are 'standby', 'in_pulse', 'in_long_pulse'
 
+		# DEBUG
+		print("Detected rising edge")
+
 		if self.signalState is 'standby':
 			
 			self.signalState = 'in_pulse'
@@ -149,6 +148,9 @@ class Myo(MyoRaw):
 
 
 	def detectedFallingEdge(self):
+
+		# DEBUG
+		#print("Detected falling edge")
 
 		if self.signalState is 'standby':
 			# do nothing
