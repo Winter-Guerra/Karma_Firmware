@@ -8,6 +8,7 @@ import random
 
 from myo_common import *
 from myo_raw import MyoRaw
+from Quaternion import *
 
 class Myo(MyoRaw):
 	'''Adds higher-level pose classification and handling onto MyoRaw.'''
@@ -43,7 +44,8 @@ class Myo(MyoRaw):
 		# These vars are used later by logic
 		self.lastRisingEdge = 0
 		self.signalState = 'standby' # values can be 'standby', 'in_pulse', 'in_long_pulse'
-		self.IMU_enable = False
+		self.IMU_Enabled = False # 
+		self.startingQuaternion = None # Keep this at None when not in use
 
 		
 		# Set the logic triggers
@@ -54,12 +56,12 @@ class Myo(MyoRaw):
 		#self.add_emg_handler(lambda unused1, unused2: print( str( time.time() ) ) )
 
 		# IMU
-		def debugIMU(quat, accel, gyro):
-			if random.randrange(1,10) is 1:
-					print(quat, accel, gyro)
+		# def debugIMU(quat, accel, gyro):
+		# 	if random.randrange(1,10) is 1:
+		# 			print(quat, accel, gyro)
 
-
-		self.add_imu_handler(debugIMU)
+		# 	#print(quat, accel, gyro)
+		self.add_imu_handler(self.IMUCallback)
 		
 
 	def edge_detector(self, datapoint, moving):
@@ -189,15 +191,40 @@ class Myo(MyoRaw):
 		self.signalState = 'standby'
 
 	def startIMUCallbacks(self):
-		print("starting IMU callbacks (NOT IMPLIMENTED)")
+		print("starting IMU callbacks")
 
-		# Just log quaternions for now.
+		# Start the callback
+		self.IMU_Enabled = True
 
 	def stopIMUCallbacks(self):
-		print("stopping IMU callbacks (NOT IMPLIMENTED)")
+		print("stopping IMU callbacks")
 
-		# Stop logging
+		self.IMU_Enabled = False 
 
+	def IMUCallback(self, quat, accel, gyro):
+		# Check if we can continue with our callback
+		if self.IMU_Enabled:
+
+			# Check if we need to take a reference quaternion
+			if not self.startingQuaternion:
+				normalizedQuaternionArray = normalize(quat)
+				self.startingQuaternion = Quat(normalizedQuaternionArray)
+				return
+
+			else:
+				# we should do some math to see how much we have rolled.
+				currentQuaternionArray = normalize(quat)
+				currentQuaternion = Quat(currentQuaternionArray)
+
+				# Take the current position and multiply that with the inverse of the original position (to get a local delta)
+				differenceQuat = currentQuaternion / self.startingQuaternion
+
+				# Take the roll component out of the quat
+				print(differenceQuat.roll)
+
+		else:
+			# Reset our saved position
+			self.startingQuaternion = None
 
 	# MATH functions
 
