@@ -8,7 +8,7 @@ import random
 
 from myo_common import *
 from myo_raw import MyoRaw
-from Quaternion import *
+#from Quaternion import *
 
 class Myo(MyoRaw):
 	'''Adds higher-level pose classification and handling onto MyoRaw.'''
@@ -46,6 +46,7 @@ class Myo(MyoRaw):
 		self.signalState = 'standby' # values can be 'standby', 'in_pulse', 'in_long_pulse'
 		self.IMU_Enabled = False # 
 		self.startingQuaternion = None # Keep this at None when not in use
+		self.startingRoll = None
 
 		
 		# Set the logic triggers
@@ -206,25 +207,49 @@ class Myo(MyoRaw):
 		if self.IMU_Enabled:
 
 			# Check if we need to take a reference quaternion
-			if not self.startingQuaternion:
-				normalizedQuaternionArray = normalize(quat)
-				self.startingQuaternion = Quat(normalizedQuaternionArray)
-				return
+			#if not self.startingQuaternion:
+			if not self.startingRoll:
+				# For Quaternions
+				# normalizedQuaternionArray = normalize(quat)
+				# self.startingQuaternion = Quat(normalizedQuaternionArray)
+				
+				# Without Numpy
+				x = quat[0]
+				y = quat[1]
+				z = quat[2]
+				w = quat[3]
+
+				self.startingRoll  = -math.atan2(2*y*z + 2*w*x, -w*w + x*x + y*y - z*z)
+
 
 			else:
+				# WITH NUMPY
 				# we should do some math to see how much we have rolled.
-				currentQuaternionArray = normalize(quat)
-				currentQuaternion = Quat(currentQuaternionArray)
+				# currentQuaternionArray = normalize(quat)
+				# currentQuaternion = Quat(currentQuaternionArray)
 
-				# Take the current position and multiply that with the inverse of the original position (to get a local delta)
-				differenceQuat = currentQuaternion / self.startingQuaternion
+				# # Take the current position and multiply that with the inverse of the original position (to get a local delta)
+				# differenceQuat = currentQuaternion / self.startingQuaternion
 
-				# Take the roll component out of the quat
-				print(differenceQuat.roll)
+				# # Take the roll component out of the quat
+				# print(differenceQuat.roll)
+
+				# WITHOUT NUMPY
+				x = quat[0]
+				y = quat[1]
+				z = quat[2]
+				w = quat[3]
+
+				currentRoll  = -math.atan2(2*y*z + 2*w*x, -w*w + x*x + y*y - z*z)
+
+				# Subtract the starting roll from the current roll
+				differenceRoll = currentRoll - self.startingRoll
+				print(differenceRoll)
 
 		else:
 			# Reset our saved position
 			self.startingQuaternion = None
+			self.startingRoll = None
 
 	# MATH functions
 
