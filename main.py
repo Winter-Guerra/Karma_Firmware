@@ -128,7 +128,7 @@ class Arm(object):
 		self.setWristTimer()
 
 	def killScript(self):
-		sys.exit(1) # exit with error code
+		sys.exit(0) # exit with error code
 
 		
 

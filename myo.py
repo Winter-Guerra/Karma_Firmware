@@ -252,7 +252,7 @@ class Myo(MyoRaw):
 		# Check the last known communication timestamp. If it was long ago, kill the script and allow forever to bring it back up.
 		currentTime = time.time()
 		if (currentTime - self.lastKnownCommunication) > Myo.MAX_TIME_WITHOUT_COMMS:
-			sys.exit(1) # exit with error code
+			sys.exit(0) # exit with error code
 
 		# Make this function repeat forever on a timer
 		threading.Timer(Myo.MAX_TIME_WITHOUT_COMMS, self.watchCommunications).start()
