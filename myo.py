@@ -4,6 +4,7 @@ from collections import Counter, deque
 import sys
 import time
 import math
+import random
 
 from myo_common import *
 from myo_raw import MyoRaw
@@ -12,7 +13,9 @@ class Myo(MyoRaw):
 	'''Adds higher-level pose classification and handling onto MyoRaw.'''
 
 	# This is calibrated to hold about 1min of data. This will be used to find the baseline muscle activity.
-	HIST_LEN = 5 * 50 # 5 seconds at about 50hz
+	AVERAGE_SAMPLE_RATE = 5 # HZ for the rolling average
+	AVERAGE_SAMPLE_MODULO = 50/AVERAGE_SAMPLE_RATE
+	HIST_LEN = int( (10*AVERAGE_SAMPLE_RATE)) # 10 seconds at about 10hz (downsampled), 
 	MAX_SHORT_PULSE_TIME = 0.5 # seconds
 	ARM_IDLE_CERTAINTY = 0.8 # certainty that arm is idle must be higher than this.
 	MAX_MUSCLE_DIFFERENCE = 2.5 # Bicep and tricep cannot be more than 2x higher than each other.
@@ -33,6 +36,7 @@ class Myo(MyoRaw):
 
 		# # Initiate the history. Initially, this list has an average of zero.
 		self.rollingHistory = deque([(1,1)], Myo.HIST_LEN)
+		self.rollingHistoryModuloCounter = 0
 		self.recentActivityList = deque([(1,1)], Myo.FRAMES_FOR_RECENT_ACTIVITY)
 
 
@@ -50,7 +54,12 @@ class Myo(MyoRaw):
 		#self.add_emg_handler(lambda unused1, unused2: print( str( time.time() ) ) )
 
 		# IMU
-		self.add_imu_handler(print)
+		def debugIMU(quat, accel, gyro):
+			if random.randrange(1,10) is 1:
+					print(quat, accel, gyro)
+
+
+		self.add_imu_handler(debugIMU)
 		
 
 	def edge_detector(self, datapoint, moving):
@@ -60,9 +69,15 @@ class Myo(MyoRaw):
 		sortedDatapoints = sorted(datapoint)
 		self.recentActivityList.append(sortedDatapoints)
 
-		# If our signal is not currently "HIGH", we should update our rolling muscle average
-		if self.signalState is 'standby':
-			self.rollingHistory.append(sortedDatapoints)
+		# Let's take a rolling muscle average, downsampled to a reasonable rate
+		if self.rollingHistoryModuloCounter >= Myo.AVERAGE_SAMPLE_MODULO:
+			self.rollingHistoryModuloCounter = 0
+
+			# If our signal is not currently "HIGH", we should update our rolling muscle average.
+			if self.signalState is 'standby':
+				self.rollingHistory.append(sortedDatapoints)
+		else:
+			self.rollingHistoryModuloCounter += 1
 
 		# Take an average of our history. This should be the baseline muscle activity.
 		self.average_baseline = self.averageDatapoints(self.rollingHistory)
