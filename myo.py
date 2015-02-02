@@ -12,7 +12,7 @@ class Myo(MyoRaw):
 	'''Adds higher-level pose classification and handling onto MyoRaw.'''
 
 	# This is calibrated to hold about 1min of data. This will be used to find the baseline muscle activity.
-	HIST_LEN = 15 * 50 # 30 seconds at about 50hz
+	HIST_LEN = 5 * 50 # 5 seconds at about 50hz
 	MAX_SHORT_PULSE_TIME = 0.5 # seconds
 	ARM_IDLE_CERTAINTY = 0.8 # certainty that arm is idle must be higher than this.
 	MAX_MUSCLE_DIFFERENCE = 2.5 # Bicep and tricep cannot be more than 2x higher than each other.
@@ -31,7 +31,7 @@ class Myo(MyoRaw):
 		}
 
 		# # Initiate the history. Initially, this list has an average of zero.
-		self.history = deque([(1,1)], Myo.HIST_LEN)
+		self.rollingHistory = deque([(1,1)], Myo.HIST_LEN)
 		self.recentActivityList = deque([(1,1)], Myo.FRAMES_FOR_RECENT_ACTIVITY)
 
 
@@ -39,6 +39,7 @@ class Myo(MyoRaw):
 		self.lastRisingEdge = 0
 		self.signalState = 'standby' # values can be 'standby', 'in_pulse', 'in_long_pulse'
 		self.IMU_enable = False
+
 		
 		# Set the logic triggers
 		# EMG
@@ -54,11 +55,14 @@ class Myo(MyoRaw):
 		# Take our current datapoint and sort it for ease of use later.
 		# Then, let's add it to our history
 		sortedDatapoints = sorted(datapoint)
-		self.history.append(sortedDatapoints)
 		self.recentActivityList.append(sortedDatapoints)
 
+		# If our signal is not currently "HIGH", we should update our rolling muscle average
+		if self.signalState is 'standby':
+			self.rollingHistory.append(sortedDatapoints)
+
 		# Take an average of our history. This should be the baseline muscle activity.
-		average_baseline = self.averageDatapoints(self.history)
+		self.average_baseline = self.averageDatapoints(self.rollingHistory)
 
 		# Check if our last 0.25sec of recent activity has had relatively even muscle activity. I.E. bicep and tricep are within 2x of each other >90% of the time
 
@@ -69,7 +73,7 @@ class Myo(MyoRaw):
 			#print("percentage pass at {}".format(percentageOfTimeMuscleIsValid))
 			
 			# Now, check if the average muscle activity is higher than our average by at least 4x
-			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(self.recentActivityList, average_baseline)
+			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(self.recentActivityList, self.average_baseline)
 			
 			if timesHighThanAverage > Myo.MIN_AMPLITUDE_THRESHOLD:
 				# Then, we have a rising edge.
