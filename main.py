@@ -36,7 +36,8 @@ class Arm(object):
 		# Create the Myo controller sensor (with callbacks)
 		callbacks = {
 			'toggleHand': self.toggleHand,
-			'updateWristRotation': self.updateWristRotation
+			'updateWristRotation': self.updateWristRotation,
+			'isHandClosed': self.isHandClosed
 		}
 
 		self.myo = Myo(callbacks) 
@@ -90,6 +91,13 @@ class Arm(object):
 		else:
 			self.openHand()
 			self.handStatus = 'opened'
+
+	def isHandClosed(self):
+		if self.handStatus is 'closed':
+			return True
+		else:
+			return False
+
 	
 	def setWristPosition(self, deg):
 		# Each time that this is called

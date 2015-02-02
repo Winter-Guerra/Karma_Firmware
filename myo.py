@@ -21,8 +21,8 @@ class Myo(MyoRaw):
 	HIST_LEN = int( (10*AVERAGE_SAMPLE_RATE)) # 10 seconds at about 10hz (downsampled), 
 	MAX_SHORT_PULSE_TIME = 0.5 # seconds
 	ARM_IDLE_CERTAINTY = 0.8 # certainty that arm is idle must be higher than this.
-	MAX_MUSCLE_DIFFERENCE = 2.25 # Bicep and tricep cannot be more than 2x higher than each other.
-	MIN_AMPLITUDE_THRESHOLD = 3.5 # All signals must be at least 3x larger than the norm.
+	MAX_MUSCLE_DIFFERENCE = 2 # Bicep and tricep cannot be more than 2x higher than each other.
+	MIN_AMPLITUDE_THRESHOLD = 3.25 # All signals must be at least 3x larger than the norm.
 	FRAMES_FOR_RECENT_ACTIVITY = int(0.25*50) #1/4 sec at 50hz
 	MAX_TIME_WITHOUT_COMMS = 10 # seconds
 
@@ -31,12 +31,6 @@ class Myo(MyoRaw):
 		# Initialize internals
 		MyoRaw.__init__(self, None)
 		self.callbacks = callbacks
-
-		# FOR DEBUGGING
-		# self.callbacks = {
-		# 	'toggleHand': lambda: print("Toggling Hand (NOT IMPLIMENTED)"),
-		# 	'updateWristRotation': lambda: print("Rotating wrist (NOT IMPLIMENTED)")
-		# }
 
 		# # Initiate the history. Initially, this list has an average of something huge
 		self.rollingHistory = deque([(1000,1000)], Myo.HIST_LEN)
@@ -97,7 +91,13 @@ class Myo(MyoRaw):
 		if percentageOfTimeMuscleIsValid > Myo.ARM_IDLE_CERTAINTY:
 			#print("percentage pass at {}".format(percentageOfTimeMuscleIsValid))
 			
-			# Now, check if the average muscle activity is higher than our average by at least 4x
+			# Now, check if the average muscle activity is higher than our average by at least 4x. More if our hand is closed.
+
+			minThreshold = Myo.MIN_AMPLITUDE_THRESHOLD
+			# Make it harder to open the hand
+			minThreshold += 0.5 if self.callbacks['isHandClosed']() else 0
+
+
 			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(self.recentActivityList, self.average_baseline)
 			
 			if timesHighThanAverage > Myo.MIN_AMPLITUDE_THRESHOLD:
