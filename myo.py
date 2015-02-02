@@ -50,6 +50,7 @@ class Myo(MyoRaw):
 		#self.add_emg_handler(lambda unused1, unused2: print( str( time.time() ) ) )
 
 		# IMU
+		self.add_imu_handler(print)
 		
 
 	def edge_detector(self, datapoint, moving):
@@ -175,8 +176,12 @@ class Myo(MyoRaw):
 	def startIMUCallbacks(self):
 		print("starting IMU callbacks (NOT IMPLIMENTED)")
 
+		# Just log quaternions for now.
+
 	def stopIMUCallbacks(self):
 		print("stopping IMU callbacks (NOT IMPLIMENTED)")
+
+		# Stop logging
 
 
 	# MATH functions
