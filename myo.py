@@ -12,8 +12,11 @@ class Myo(MyoRaw):
 	'''Adds higher-level pose classification and handling onto MyoRaw.'''
 
 	# This is calibrated to hold about 1min of data. This will be used to find the baseline muscle activity.
-	HIST_LEN = 60 * 50 # 60 seconds at about 50hz
+	HIST_LEN = 30 * 50 # 30 seconds at about 50hz
 	MAX_SHORT_PULSE_TIME = 0.5 # seconds
+	ARM_IDLE_CERTAINTY = 0.9 # certainty that arm is idle must be higher than this.
+	MAX_MUSCLE_DIFFERENCE = 2 # Bicep and tricep cannot be more than 2x higher than each other.
+	MIN_AMPLITUDE_THRESHOLD = 4 # All signals must be at least 4x larger than the norm.
 
 	# Callbacks is a dict
 	def __init__(self, callbacks):
@@ -63,20 +66,21 @@ class Myo(MyoRaw):
 		recentActivityList = self.history[-recentActivityLength:]
 
 		# Check for even muscle activity on the last 0.25 seconds
-		percentageOfTimeMuscleIsValid = self.evenMuscleActivityTimePercentage(recentActivityList, 2)
+		percentageOfTimeMuscleIsValid = self.evenMuscleActivityTimePercentage(recentActivityList, Myo.MAX_MUSCLE_DIFFERENCE)
 		
-		if percentageOfTimeMuscleIsValid > 0.9:
-			print("percentage pass at {}".format(percentageOfTimeMuscleIsValid))
+		if percentageOfTimeMuscleIsValid > Myo.ARM_IDLE_CERTAINTY:
+			#print("percentage pass at {}".format(percentageOfTimeMuscleIsValid))
 			
 			# Now, check if the average muscle activity is higher than our average by at least 4x
 			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(recentActivityList, average_baseline)
 			
-			if timesHighThanAverage > 4:
+			if timesHighThanAverage > Myo.MIN_AMPLITUDE_THRESHOLD:
 				print("Detected rising edge")
 				# Then, we have a rising edge.
 				self.detectedRisingEdge()
 				return
-
+		else:
+			print("Arm moving. Not making a signal.")
 		# If we make it here, we detected a falling edge
 		self.detectedFallingEdge()
 
