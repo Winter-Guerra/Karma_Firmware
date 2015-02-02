@@ -14,6 +14,7 @@ from myo_common import *
 class Arm(object):
 
 	MOTOR_IDLE_TIME = 2 # seconds
+	WRIST_SPEED = 50 # a scalar on the relative rotation speed for the updateWristRotation() callback
 
 
 	# This will create the hand and wrist servos in the arm. This will also create the Myo instance.
@@ -30,7 +31,7 @@ class Arm(object):
 
 		# Center motors
 		self.openHand()
-		self.updateWristRotation(90) # deg
+		self.setWristPosition(90) # deg
 
 		# Create the Myo controller sensor (with callbacks)
 		callbacks = {
@@ -89,10 +90,22 @@ class Arm(object):
 		else:
 			self.openHand()
 			self.handStatus = 'opened'
-		
-
-	def updateWristRotation(self, deg):
+	
+	def setWristPosition(self, deg):
+		# Each time that this is called
 		self.wristServo.angle(deg)
+		self.wristServo.enable()
+		# turn off the servo after a few seconds
+		self.setWristTimer()
+
+	def updateWristRotation(self, offsetRadians):
+		# Get the current angle of the servo
+		currentAngle = self.wristServo.getAngle()
+
+		# Figure out where the servo should go
+		newAngle = currentAngle + offsetRadians * Arm.WRIST_SPEED
+
+		self.wristServo.angle(newAngle)
 		self.wristServo.enable()
 		# turn off the servo after a few seconds
 		self.setWristTimer()

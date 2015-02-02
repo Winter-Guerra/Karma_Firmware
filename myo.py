@@ -8,6 +8,7 @@ import random
 
 from myo_common import *
 from myo_raw import MyoRaw
+# NO U
 #from Quaternion import *
 
 class Myo(MyoRaw):
@@ -18,9 +19,9 @@ class Myo(MyoRaw):
 	AVERAGE_SAMPLE_MODULO = 50/AVERAGE_SAMPLE_RATE
 	HIST_LEN = int( (10*AVERAGE_SAMPLE_RATE)) # 10 seconds at about 10hz (downsampled), 
 	MAX_SHORT_PULSE_TIME = 0.5 # seconds
-	ARM_IDLE_CERTAINTY = 0.8 # certainty that arm is idle must be higher than this.
-	MAX_MUSCLE_DIFFERENCE = 2.5 # Bicep and tricep cannot be more than 2x higher than each other.
-	MIN_AMPLITUDE_THRESHOLD = 3 # All signals must be at least 4x larger than the norm.
+	ARM_IDLE_CERTAINTY = 0.7 # certainty that arm is idle must be higher than this.
+	MAX_MUSCLE_DIFFERENCE = 3 # Bicep and tricep cannot be more than 2x higher than each other.
+	MIN_AMPLITUDE_THRESHOLD = 2 # All signals must be at least 3x larger than the norm.
 	FRAMES_FOR_RECENT_ACTIVITY = int(0.25*50) #1/4 sec at 50hz
 
 	# Callbacks is a dict
@@ -148,7 +149,7 @@ class Myo(MyoRaw):
 		# Hint, states that we can be in are 'standby', 'in_pulse', 'in_long_pulse'
 
 		# DEBUG
-		print("Detected rising edge", time.time())
+		#print("Detected rising edge", time.time())
 
 		if self.signalState is 'standby':
 			
@@ -183,6 +184,7 @@ class Myo(MyoRaw):
 
 		elif self.signalState is 'in_pulse':
 			# Then we should tell the hand to open and close
+			print("Toggling hand.")
 			self.callbacks['toggleHand']()
 
 		elif self.signalState is 'in_long_pulse':
@@ -244,7 +246,10 @@ class Myo(MyoRaw):
 
 				# Subtract the starting roll from the current roll
 				differenceRoll = currentRoll - self.startingRoll
-				print(differenceRoll)
+				# Debug
+				#print("Angle:", differenceRoll)
+				self.callbacks['updateWristRotation'](differenceRoll)
+				
 
 		else:
 			# Reset our saved position

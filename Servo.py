@@ -26,6 +26,7 @@ class Servo(object):
 	def __init__(self, servoType):
 		self.servoType = servoType
 		self.enabled = False
+		self.savedAngle = 90 # initial pos
 
 		# Initialize the pins, but do not start PWM until the first PWM command has been given
 		self.initializePins()
@@ -54,6 +55,13 @@ class Servo(object):
 	# Main mapping PWM function
 	def angle(self, angleValue):
 		# Map the angle to a duty cycle value
+
+		# do some sanity checking of the angle input
+		if angleValue > 180:
+			angleValue = 180
+		elif angleValue < 0:
+			angleValue = 0
+
 		inputRange = (0.0, 180.0)
 		outputRange = ( float(self.getMinDutyCycle()), float(self.getMaxDutyCycle()) )
 		dutyCyleFloat = self.scale( angleValue, inputRange, outputRange)
@@ -61,6 +69,14 @@ class Servo(object):
 		dutyCycle = int(round(dutyCyleFloat))
 		# Set the duty cycle
 		self.setDutyCycle(dutyCycle)
+
+		# Set the internal angle store of the servo. This is so that we can access this later.
+		self.savedAngle = angleValue
+
+	def getAngle(self):
+		# Returns the last known position of the servo
+		return self.savedAngle
+
 
 	# STATIC helper scaling function
 	def scale(self, val, src, dst):
