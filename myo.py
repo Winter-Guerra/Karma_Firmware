@@ -20,8 +20,8 @@ class Myo(MyoRaw):
 	HIST_LEN = int( (10*AVERAGE_SAMPLE_RATE)) # 10 seconds at about 10hz (downsampled), 
 	MAX_SHORT_PULSE_TIME = 0.5 # seconds
 	ARM_IDLE_CERTAINTY = 0.7 # certainty that arm is idle must be higher than this.
-	MAX_MUSCLE_DIFFERENCE = 3 # Bicep and tricep cannot be more than 2x higher than each other.
-	MIN_AMPLITUDE_THRESHOLD = 2 # All signals must be at least 3x larger than the norm.
+	MAX_MUSCLE_DIFFERENCE = 2.5 # Bicep and tricep cannot be more than 2x higher than each other.
+	MIN_AMPLITUDE_THRESHOLD = 3 # All signals must be at least 3x larger than the norm.
 	FRAMES_FOR_RECENT_ACTIVITY = int(0.25*50) #1/4 sec at 50hz
 
 	# Callbacks is a dict
