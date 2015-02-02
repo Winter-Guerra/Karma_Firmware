@@ -42,8 +42,16 @@ class Arm(object):
 
 		self.myo = Myo(callbacks) 
 
+
+		# Kill the script if the myo does not connect on time.
+		killTimer = threading.Timer(5, self.killScript)
+		killTimer.start()
+
 		# Start the Myo sensor.
 		self.myo.connect()
+
+		# Kill the kill timer
+		killTimer.cancel()
 
 		# Become slave to the myo sensor
 		while True:
@@ -117,6 +125,9 @@ class Arm(object):
 		self.wristServo.enable()
 		# turn off the servo after a few seconds
 		self.setWristTimer()
+
+	def killScript(self):
+		sys.exit(1) # exit with error code
 
 		
 

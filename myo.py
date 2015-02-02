@@ -93,11 +93,6 @@ class Myo(MyoRaw):
 			
 			# Now, check if the average muscle activity is higher than our average by at least 4x. More if our hand is closed.
 
-			minThreshold = Myo.MIN_AMPLITUDE_THRESHOLD
-			# Make it harder to open the hand
-			minThreshold += 0.5 if self.callbacks['isHandClosed']() else 0
-
-
 			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(self.recentActivityList, self.average_baseline)
 			
 			if timesHighThanAverage > Myo.MIN_AMPLITUDE_THRESHOLD:
