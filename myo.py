@@ -23,7 +23,7 @@ class Myo(MyoRaw):
 
 		# FOR DEBUGGING
 		self.callbacks = {
-			toggleHand: print("Toggling Hand (NOT IMPLIMENTED)")
+			'toggleHand': lambda: print("Toggling Hand (NOT IMPLIMENTED)")
 		}
 
 		# # Initiate the history. Initially, this list has an average of zero.
@@ -39,7 +39,7 @@ class Myo(MyoRaw):
 		# EMG
 		self.add_emg_handler(self.edge_detector)
 
-		self.add_emg_handler(print)
+		#self.add_emg_handler(print)
 
 		# IMU
 		
@@ -72,6 +72,7 @@ class Myo(MyoRaw):
 			timesHighThanAverage = self.getHistoryTimesHigherThanAverage(recentActivityList, average_baseline)
 			
 			if timesHighThanAverage > 4:
+				print("Detected rising edge")
 				# Then, we have a rising edge.
 				self.detectedRisingEdge()
 				return
@@ -85,7 +86,7 @@ class Myo(MyoRaw):
 	def averageDatapoints(self, datapoints):
 		# Take an average of our history. This should be the baseline muscle activity.
 		total = 0
-		for datapoint in datapoints
+		for datapoint in datapoints:
 			total = total + sum(datapoint) # 
 		
 		average = total/len(datapoints)
@@ -94,22 +95,23 @@ class Myo(MyoRaw):
 	def evenMuscleActivityTimePercentage(self, datapoints, upperLimit):
 		# Go through each sorted datapoint and get the high and low muscle readings
 		passingDatapoints = []
-		for datapoint in datapoints
+		for datapoint in datapoints:
 			highMuscleSensors = datapoint[-4:]
 			highMuscleSensorValue = sum(highMuscleSensors)
 
 			lowMuscleSensors = datapoint[:4]
-			lowMuscleSensorValue = sum(highMuscleSensors)
+			lowMuscleSensorValue = sum(lowMuscleSensors)
 
 			# Check if the muscle values are kind of equal
 			datapointPasses = (float(highMuscleSensorValue)/lowMuscleSensorValue < upperLimit )
+			
 			# Log if this datapoint was valid
 			passingDatapoints.append( 1 if datapointPasses else 0 )
 
 		# Check the percentage of the time that all muscles had valid data
 		return float(sum(passingDatapoints))/len(passingDatapoints)
 
-	def getHistoryTimesHigherThanAverage(datapoints, average_baseline):
+	def getHistoryTimesHigherThanAverage(self, datapoints, average_baseline):
 		# Check how many times higher is the recent activity to the avg baseline
 		recentAverageActivity = self.averageDatapoints(datapoints) 
 
@@ -137,16 +139,18 @@ class Myo(MyoRaw):
 
 		elif self.signalState is 'in_long_pulse':
 			# We don't really have to do anything here until the signal goes down again. The IMU callbacks will be going strong during this time
+			pass
 
 
 	def detectedFallingEdge(self):
 
 		if self.signalState is 'standby':
 			# do nothing
+			pass
 
 		elif self.signalState is 'in_pulse':
 			# Then we should tell the hand to open and close
-			self.callbacks.toggleHand()
+			self.callbacks['toggleHand']()
 
 		elif self.signalState is 'in_long_pulse':
 			self.stopIMUCallbacks()
