@@ -20,7 +20,7 @@ try:
 except ImportError:
     HAVE_PYGAME = False
 
-from common import *
+from myo_common import *
 import myo
 
 class EMGHandler(object):

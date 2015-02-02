@@ -1,8 +1,8 @@
 #!/usr/bin/env python 
 
-import time
+# Code is copyright Winter Guerra <winterg@mit.edu> February 2015, all rights reserved.
 
-# This file is the main Karma controller
+import time
 
 # Let's test the servos
 class Servo(object):

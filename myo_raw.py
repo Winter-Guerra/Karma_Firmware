@@ -10,7 +10,7 @@ import time
 import serial
 from serial.tools.list_ports import comports
 
-from common import *
+from myo_common import *
 
 def multichr(ords):
     if sys.version_info[0] >= 3:
