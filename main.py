@@ -36,9 +36,12 @@ class Servo(object):
 			pinmux.write('mode1')
 		
 		# echo 1 > /sys/class/pwm/pwmchip0/export
-		with open("/sys/class/pwm/pwmchip0/export", "w") as enablePWM:
-			enablePWM.write(str(self.getPWMPin()))
-
+		try:
+			with open("/sys/class/pwm/pwmchip0/export", "w") as enablePWM:
+				enablePWM.write(str(self.getPWMPin()))
+		except:
+			print "Pin {} is already setup as a PWM output. Skipping this setup step.".format(self.getPWMPin())
+			
 		# echo 20000000 > /sys/class/pwm/pwmchip0/pwm1/period
 		with open("/sys/class/pwm/pwmchip0/pwm{}/period".format(self.getPWMPin()), "w") as period:
 			period.write(str(self.getPeriod()))
