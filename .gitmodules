@@ -1,0 +1,3 @@
+[submodule "myo-bluetooth-reference-headers"]
+	path = myo-bluetooth-reference-headers
+	url = git@github.com:thalmiclabs/myo-bluetooth.git
