@@ -50,6 +50,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Don't boot with headless mode
     #vb.gui = true
     
+
+    # Use "$VBoxManage list usbhost" to find all USB devices on a host system.
+    # Then, use lsusb to find the devices connected to the guest system
     vb.customize ["modifyvm", :id, "--memory", "2048"]
     vb.customize ['modifyvm', :id, '--usb', 'on']
     vb.customize ["modifyvm", :id, "--usbehci", "on"]
@@ -65,6 +68,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         "--name", "Apple Bluetooth Adapter", 
         "--vendorid", '0x05ac',
         "--productid", '0x8289']
+
+    # Add the Thlamic labs bluetooth dongle
+    vb.customize ["usbfilter", "add", "0",
+        "--target", :id, 
+        "--name", "Bluegiga", 
+        "--vendorid", '0x2458',
+        "--productid", '0x0001']
   end
   
   # View the documentation for the provider you're using for more
